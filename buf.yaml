@@ -1,0 +1,4 @@
+version: v1
+name: buf.build/AnthonyHewins/imgscrape
+deps:
+  - buf.build/grpc-ecosystem/grpc-gateway

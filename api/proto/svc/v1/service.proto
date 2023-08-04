@@ -1,0 +1,115 @@
+syntax = "proto3";
+
+package svc.v1;
+
+import "google/api/annotations.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+
+option go_package = "github.com/AnthonyHewins/imgscrape/gen/go/organizationsvc/v1;organizationsvc";
+
+// This makes heavy use of https://cloud.google.com/endpoints/docs/grpc-service-config/reference/rpc/google.api#google.api.Http
+// for generating REST APIs using gRPC, so you can get two protocols for the effort of 1 better protocol
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+    info: {
+      title: "Your service";
+      version: "0.0";
+      contact: {
+        name: "Contact name";
+        url: "github.com/AnthonyHewins/imgscrape";
+        email: "email";
+      };
+      extensions: {
+        key: "x-something-something";
+        value {string_value: "yadda"}
+      }
+    };
+    // Overwriting host entry breaks tests, so this is not done here.
+    external_docs: {
+      url: "https://github.com/grpc-ecosystem/grpc-gateway";
+      description: "More about gRPC-Gateway";
+    }
+    schemes: HTTPS;
+    consumes: "application/json";
+    produces: "application/json";
+    security_definitions: {
+      security: {
+        key: "OAuth2";
+        value: {
+          type: TYPE_OAUTH2;
+          flow: FLOW_ACCESS_CODE;
+          authorization_url: "https://example.com/oauth/authorize";
+          token_url: "https://example.com/oauth/token";
+          scopes: {
+            scope: {
+              key: "read";
+              value: "Grants read access";
+            }
+            scope: {
+              key: "write";
+              value: "Grants write access";
+            }
+            scope: {
+              key: "admin";
+              value: "Grants read and write access to administrative information";
+            }
+          }
+        }
+      }
+    }
+    security: {
+      security_requirement: {
+        key: "OAuth2";
+        value: {
+          scope: "read";
+          scope: "write";
+        }
+      }
+    }
+    responses: {
+      key: "403";
+      value: {description: "Returned when the user does not have permission to access the resource."}
+    }
+    responses: {
+      key: "404";
+      value: {
+        description: "Returned when the resource does not exist.";
+        schema: {
+          json_schema: {type: STRING}
+        }
+      }
+    }
+    responses: {
+      key: "500";
+      value: {
+        description: "Returned on a server error";
+        schema: {
+          json_schema: {type: STRING}
+        }
+      }
+    }
+};
+
+service Svc {
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_tag) = {
+    description: "Your service"
+  };
+
+  rpc Index(Message) returns (Nested) {
+    option (google.api.http) = {
+        get: "/api/v1/svc/{id}/{msg.nested}";
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Summary";
+      description: "Longer description";
+    };
+  };
+}
+
+message Message {
+  int64 id = 1;
+  Nested msg = 2;
+}
+
+message Nested {
+  string nested = 1;
+}
